@@ -7,6 +7,7 @@ import {
   paymentMethod,
   sales,
   saleProduct,
+  productTypeItem,
 } from '@/db/schema';
 
 async function seed() {
@@ -37,7 +38,7 @@ async function seed() {
       qtyPound: '0.3',
     },
   ];
-  await db.insert(productItem).values(items);
+  const insertedItems = await db.insert(productItem).values(items).returning();
 
   // 🟢 Tipos de producto
   const types: (typeof productType.$inferInsert)[] = [
@@ -46,15 +47,47 @@ async function seed() {
   ];
   const [baleada, almuerzo] = await db.insert(productType).values(types).returning();
 
+  // 🧷 Relación TipoProducto - Ingredientes
+  const productTypeItemData: (typeof productTypeItem.$inferInsert)[] = [
+    // Baleada con todo => Frijoles, Huevo, Aguacate
+    {
+      productTypeId: baleada.id,
+      productItemId: insertedItems.find((i) => i.SKU === 'FRJ001')!.id,
+    },
+    {
+      productTypeId: baleada.id,
+      productItemId: insertedItems.find((i) => i.SKU === 'HUE001')!.id,
+    },
+    {
+      productTypeId: baleada.id,
+      productItemId: insertedItems.find((i) => i.SKU === 'AGU001')!.id,
+    },
+
+    // Almuerzo típico => Frijoles, Huevo, Pollo
+    {
+      productTypeId: almuerzo.id,
+      productItemId: insertedItems.find((i) => i.SKU === 'FRJ001')!.id,
+    },
+    {
+      productTypeId: almuerzo.id,
+      productItemId: insertedItems.find((i) => i.SKU === 'HUE001')!.id,
+    },
+    {
+      productTypeId: almuerzo.id,
+      productItemId: insertedItems.find((i) => i.SKU === 'PLL001')!.id,
+    },
+  ];
+  await db.insert(productTypeItem).values(productTypeItemData);
+
   // 🔵 Productos
   const products: (typeof product.$inferInsert)[] = [
     {
-      name: 'Baleada sencilla',
+      name: 'Baleada',
       price: '25.00',
       typeProductId: baleada.id,
     },
     {
-      name: 'Almuerzo con pollo',
+      name: 'Almuerzo',
       price: '75.00',
       typeProductId: almuerzo.id,
     },
