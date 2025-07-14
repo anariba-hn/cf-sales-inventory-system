@@ -8,8 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext .ts,.tsx,.js",
-    "check": "npm run lint && npm run format -- --check",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "check": "npm run lint && npm run format -- --check"
   },
   "dependencies": {
     "drizzle-orm": "^0.44.2",
