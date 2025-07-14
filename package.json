@@ -7,7 +7,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint . --ext .ts,.tsx,.js",
+    "check": "npm run lint && npm run format -- --check",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "drizzle-orm": "^0.44.2",
@@ -24,8 +26,11 @@
     "@types/react-dom": "^19",
     "dotenv": "^17.2.0",
     "drizzle-kit": "^0.31.4",
-    "eslint": "^9",
+    "eslint": "^9.31.0",
     "eslint-config-next": "15.3.5",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.5.1",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4",
     "tsx": "^4.20.3",
     "typescript": "^5"
