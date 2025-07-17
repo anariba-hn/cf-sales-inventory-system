@@ -1,3 +1,8 @@
 export default function Dashboard() {
-  return <h1>Dashboard view</h1>;
+  return (
+    <div>
+      <h2 className="text-xl font-semibold">Welcome to the Dashboard</h2>
+      <p>This is your mobile-first, responsive dashboard layout.</p>
+    </div>
+  );
 }
