@@ -2,8 +2,8 @@ import { db } from '@/db';
 import { product, productType } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-import { CreateProductDto, UpdateProductDto } from '@/dtos/product.dto';
-import { ProductWithType, Product } from '@/models/product.model';
+import { CreateProductDto, UpdateProductDto, CreateProductTypeDto } from '@/dtos/product.dto';
+import { ProductWithType, Product, ProductType } from '@/models/product.model';
 
 export class ProductService {
   static async getAll(): Promise<ProductWithType[]> {
@@ -22,6 +22,17 @@ export class ProductService {
       ...r,
       price: Number(r.price),
     }));
+  }
+
+  static async getTypeAll(): Promise<ProductType[]> {
+    const data = await db
+      .select({
+        id: productType.id,
+        name: productType.name,
+      })
+      .from(productType);
+
+    return data;
   }
 
   static async getById(id: number) {
@@ -47,6 +58,20 @@ export class ProductService {
       price: Number(result.price),
       type: null,
     };
+  }
+
+  static async createType(data: CreateProductTypeDto): Promise<ProductType> {
+    const { name } = data;
+
+    const typeExists = await db.select().from(productType).where(eq(productType.name, name));
+
+    if (typeExists.length !== 0) {
+      throw new Error(`Product type ${typeExists} does already exist`);
+    }
+
+    const [newProductType] = await db.insert(productType).values({ name }).returning();
+
+    return newProductType;
   }
 
   static async update(id: number, data: UpdateProductDto): Promise<Product | null> {

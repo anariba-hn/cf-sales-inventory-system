@@ -1,16 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { createProductAction, getProductsAction } from '@/actions/product';
-import { useEffect } from 'react';
+import { createProductAction } from '@/actions/product';
+import { ProductType } from '@/models/product.model';
 
-export function ProductFrom() {
-  const [productTypes, setProductTypes] = useState<{ id: number; name: string }[]>([]);
+type ProductFormProps = {
+  productTypes: ProductType[];
+};
 
-  useEffect(() => {
-    getProductsAction().then(setProductTypes);
-  }, []);
-
+export function ProductFrom({ productTypes }: ProductFormProps) {
   return (
     <form action={createProductAction} className="space-y-4">
       <input name="name" placeholder="Nombre del producto" className="border p-2 w-full" />

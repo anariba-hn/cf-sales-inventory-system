@@ -8,3 +8,8 @@ export interface Product {
 export interface ProductWithType extends Product {
   type: string | null;
 }
+
+export interface ProductType {
+  id: number;
+  name: string;
+}

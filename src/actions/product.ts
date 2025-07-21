@@ -8,6 +8,10 @@ export async function getProductsAction() {
   return await ProductService.getAll();
 }
 
+export async function getTypeAction() {
+  return await ProductService.getTypeAll();
+}
+
 export async function createProductAction(formData: FormData) {
   const name = formData.get('name') as string;
   const price = formData.get('price') as string;
@@ -19,6 +23,18 @@ export async function createProductAction(formData: FormData) {
 
   await ProductService.create({ name, price, typeProductId });
   revalidatePath('/products');
+}
+
+export async function createProductType(formData: FormData) {
+  const name = formData.get('name') as string;
+
+  if (!name) {
+    throw new Error('Invalid form data');
+  }
+
+  const newType = await ProductService.createType({ name });
+  revalidatePath('/products');
+  return newType;
 }
 
 export async function updateProductAction(

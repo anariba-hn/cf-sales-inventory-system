@@ -9,3 +9,7 @@ export interface UpdateProductDto {
   price?: string;
   typeProductId?: number;
 }
+
+export interface CreateProductTypeDto {
+  name: string;
+}
