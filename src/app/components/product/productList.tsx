@@ -1,30 +1,36 @@
 'use client';
 import { ProductWithType } from '@/models/product.model';
-import { useEffect, useState } from 'react';
-import { getProductsAction, deleteProductAction } from '@/actions/product';
+import { useState } from 'react';
+import { deleteProductAction } from '@/actions/product';
 import { ProductEditForm } from './productEditForm';
 
-export function ProductList() {
-  const [products, setProducts] = useState<ProductWithType[]>([]);
-  const [editingId, setEditingId] = useState<number | null>(null);
+type ProductListProps = {
+  productWithType: ProductWithType[];
+  onDelete?: (id: number) => void;
+  onEditDone?: () => void;
+};
 
-  useEffect(() => {
-    getProductsAction().then(setProducts);
-  }, []);
+export function ProductList({ productWithType, onDelete, onEditDone }: ProductListProps) {
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   async function handleDelete(id: number) {
     await deleteProductAction(id);
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+    setEditingId(null);
+    if (onDelete) {
+      onDelete(id);
+    }
   }
 
   function handleEditDone() {
     setEditingId(null);
-    getProductsAction().then(setProducts);
+    if (onEditDone) {
+      onEditDone();
+    }
   }
 
   return (
     <div className="space-y-4">
-      {products.map((product) =>
+      {productWithType.map((product) =>
         editingId === product.id ? (
           <ProductEditForm key={product.id} product={product} onDone={handleEditDone} />
         ) : (

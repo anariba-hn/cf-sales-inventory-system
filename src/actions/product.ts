@@ -21,8 +21,9 @@ export async function createProductAction(formData: FormData) {
     throw new Error('Invalid form data');
   }
 
-  await ProductService.create({ name, price, typeProductId });
+  const result = await ProductService.create({ name, price, typeProductId });
   revalidatePath('/products');
+  return result;
 }
 
 export async function createProductType(formData: FormData) {

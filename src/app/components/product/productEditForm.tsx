@@ -2,7 +2,8 @@
 
 import { updateProductAction } from '@/actions/product';
 import { useState, useEffect } from 'react';
-import { getProductsAction } from '@/actions/product';
+import { getTypeAction } from '@/actions/product';
+import { ProductType } from '@/models/product.model';
 
 type Props = {
   product: {
@@ -15,10 +16,10 @@ type Props = {
 };
 
 export function ProductEditForm({ product, onDone }: Props) {
-  const [productTypes, setProductTypes] = useState<{ id: number; name: string }[]>([]);
+  const [productTypes, setProductTypes] = useState<ProductType[]>([]);
 
   useEffect(() => {
-    getProductsAction().then(setProductTypes);
+    getTypeAction().then(setProductTypes);
   }, []);
 
   return (
