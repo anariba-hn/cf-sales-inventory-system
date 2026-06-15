@@ -1,151 +1,106 @@
 import { db } from '@/db/index';
 import {
-  productItem,
-  productType,
+  category,
+  ingredient,
   product,
+  recipeItem,
   saleType,
   paymentMethod,
   sales,
-  saleProduct,
-  productTypeItem,
+  saleItem,
 } from '@/db/schema';
 
 async function seed() {
-  // 🟡 Ingredientes
-  const items: (typeof productItem.$inferInsert)[] = [
-    {
-      SKU: 'FRJ001',
-      name: 'Frijoles',
-      costUnit: '2.00',
-      qtyUnit: 1,
-    },
-    {
-      SKU: 'HUE001',
-      name: 'Huevo',
-      costUnit: '1.50',
-      qtyUnit: 2,
-    },
-    {
-      SKU: 'AGU001',
-      name: 'Aguacate',
-      costPound: '3.00',
-      qtyPound: '0.4',
-    },
-    {
-      SKU: 'PLL001',
-      name: 'Pollo',
-      costPound: '5.00',
-      qtyPound: '0.3',
-    },
-  ];
-  const insertedItems = await db.insert(productItem).values(items).returning();
+  // Categories
+  const categories = await db
+    .insert(category)
+    .values([
+      { name: 'Desayunos' },
+      { name: 'Almuerzos' },
+      { name: 'Bebidas' },
+      { name: 'Misceláneos' },
+    ])
+    .returning();
 
-  // 🟢 Tipos de producto
-  const types: (typeof productType.$inferInsert)[] = [
-    { name: 'Baleada con todo' },
-    { name: 'Almuerzo típico' },
-  ];
-  const [baleada, almuerzo] = await db.insert(productType).values(types).returning();
+  const desayunos = categories.find((c) => c.name === 'Desayunos')!;
+  const almuerzos = categories.find((c) => c.name === 'Almuerzos')!;
 
-  // 🧷 Relación TipoProducto - Ingredientes
-  const productTypeItemData: (typeof productTypeItem.$inferInsert)[] = [
-    // Baleada con todo => Frijoles, Huevo, Aguacate
-    {
-      productTypeId: baleada.id,
-      productItemId: insertedItems.find((i) => i.SKU === 'FRJ001')!.id,
-    },
-    {
-      productTypeId: baleada.id,
-      productItemId: insertedItems.find((i) => i.SKU === 'HUE001')!.id,
-    },
-    {
-      productTypeId: baleada.id,
-      productItemId: insertedItems.find((i) => i.SKU === 'AGU001')!.id,
-    },
+  // Ingredients
+  const ingredients = await db
+    .insert(ingredient)
+    .values([
+      { SKU: 'FRJ001', name: 'Frijoles', costPound: '2.00', qtyPound: '10.000' },
+      { SKU: 'HUE001', name: 'Huevo', costUnit: '1.50', qtyUnit: 30 },
+      { SKU: 'AGU001', name: 'Aguacate', costPound: '3.00', qtyPound: '5.000' },
+      { SKU: 'PLL001', name: 'Pollo', costPound: '5.00', qtyPound: '8.000' },
+      { SKU: 'TOR001', name: 'Tortilla', costUnit: '0.50', qtyUnit: 50 },
+      { SKU: 'CRM001', name: 'Crema', costPound: '4.00', qtyPound: '3.000' },
+    ])
+    .returning();
 
-    // Almuerzo típico => Frijoles, Huevo, Pollo
-    {
-      productTypeId: almuerzo.id,
-      productItemId: insertedItems.find((i) => i.SKU === 'FRJ001')!.id,
-    },
-    {
-      productTypeId: almuerzo.id,
-      productItemId: insertedItems.find((i) => i.SKU === 'HUE001')!.id,
-    },
-    {
-      productTypeId: almuerzo.id,
-      productItemId: insertedItems.find((i) => i.SKU === 'PLL001')!.id,
-    },
-  ];
-  await db.insert(productTypeItem).values(productTypeItemData);
+  const find = (sku: string) => ingredients.find((i) => i.SKU === sku)!;
 
-  // 🔵 Productos
-  const products: (typeof product.$inferInsert)[] = [
-    {
-      name: 'Baleada',
-      price: '25.00',
-      typeProductId: baleada.id,
-    },
-    {
-      name: 'Almuerzo',
-      price: '75.00',
-      typeProductId: almuerzo.id,
-    },
-  ];
-  const [prodBaleada, prodAlmuerzo] = await db.insert(product).values(products).returning();
+  // Products
+  const products = await db
+    .insert(product)
+    .values([
+      { name: 'Baleada con Todo', price: '25.00', categoryId: desayunos.id },
+      { name: 'Almuerzo Típico', price: '75.00', categoryId: almuerzos.id },
+    ])
+    .returning();
 
-  // 🟣 Tipos de venta
-  const salesTypes: (typeof saleType.$inferInsert)[] = [{ name: 'Contado' }, { name: 'Crédito' }];
-  const [contado, credito] = await db.insert(saleType).values(salesTypes).returning();
+  const baleada = products.find((p) => p.name === 'Baleada con Todo')!;
+  const almuerzo = products.find((p) => p.name === 'Almuerzo Típico')!;
 
-  // 🔶 Métodos de pago
-  const methods: (typeof paymentMethod.$inferInsert)[] = [
-    { name: 'Efectivo' },
-    { name: 'Tarjeta' },
-    { name: 'Transferencia' },
-  ];
-  const [efectivo, tarjeta] = await db.insert(paymentMethod).values(methods).returning();
+  // Recipes
+  await db.insert(recipeItem).values([
+    { productId: baleada.id, ingredientId: find('FRJ001').id, qty: '0.100', unit: 'pound' },
+    { productId: baleada.id, ingredientId: find('HUE001').id, qty: '2', unit: 'unit' },
+    { productId: baleada.id, ingredientId: find('AGU001').id, qty: '0.050', unit: 'pound' },
+    { productId: baleada.id, ingredientId: find('TOR001').id, qty: '1', unit: 'unit' },
+    { productId: baleada.id, ingredientId: find('CRM001').id, qty: '0.050', unit: 'pound' },
 
-  // 🔺 Ventas
-  const salesData: (typeof sales.$inferInsert)[] = [
-    {
-      saleTypeId: contado.id,
-      paymentMethodId: efectivo.id,
-      subTotal: '100.00',
-      total: '115.00',
-    },
-    {
-      saleTypeId: credito.id,
-      paymentMethodId: tarjeta.id,
-      subTotal: '80.00',
-      total: '90.40',
-    },
-  ];
-  const [venta1, venta2] = await db.insert(sales).values(salesData).returning();
+    { productId: almuerzo.id, ingredientId: find('FRJ001').id, qty: '0.150', unit: 'pound' },
+    { productId: almuerzo.id, ingredientId: find('HUE001').id, qty: '1', unit: 'unit' },
+    { productId: almuerzo.id, ingredientId: find('PLL001').id, qty: '0.300', unit: 'pound' },
+    { productId: almuerzo.id, ingredientId: find('TOR001').id, qty: '2', unit: 'unit' },
+    { productId: almuerzo.id, ingredientId: find('CRM001').id, qty: '0.050', unit: 'pound' },
+  ]);
 
-  // 🧩 Relación venta-producto
-  const soldProducts: (typeof saleProduct.$inferInsert)[] = [
-    {
-      saleId: venta1.id,
-      productId: prodBaleada.id,
-      qty: 2,
-    },
-    {
-      saleId: venta1.id,
-      productId: prodAlmuerzo.id,
-      qty: 1,
-    },
-    {
-      saleId: venta2.id,
-      productId: prodAlmuerzo.id,
-      qty: 2,
-    },
-  ];
-  await db.insert(saleProduct).values(soldProducts);
+  // Sale types
+  const [contado] = await db
+    .insert(saleType)
+    .values([{ name: 'Contado' }, { name: 'Crédito' }])
+    .returning();
+
+  // Payment methods
+  const [efectivo] = await db
+    .insert(paymentMethod)
+    .values([{ name: 'Efectivo' }, { name: 'Tarjeta' }, { name: 'Transferencia' }])
+    .returning();
+
+  // Sample sale
+  const [venta1] = await db
+    .insert(sales)
+    .values([
+      {
+        saleTypeId: contado.id,
+        paymentMethodId: efectivo.id,
+        subTotal: '125.00',
+        total: '125.00',
+      },
+    ])
+    .returning();
+
+  await db.insert(saleItem).values([
+    { saleId: venta1.id, productId: baleada.id, qty: 2, unitPrice: '25.00' },
+    { saleId: venta1.id, productId: almuerzo.id, qty: 1, unitPrice: '75.00' },
+  ]);
 
   console.log('✅ Seed executed successfully.');
 }
 
 seed().catch((err) => {
   console.error('❌ Error on seed.ts:', err);
+  process.exit(1);
 });

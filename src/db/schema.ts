@@ -1,38 +1,54 @@
-import { pgTable, serial, integer, varchar, timestamp, numeric } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  pgEnum,
+  serial,
+  integer,
+  varchar,
+  timestamp,
+  numeric,
+} from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+
+export const unitType = pgEnum('unit_type', ['unit', 'pound']);
+
+export const category = pgTable('category', {
+  id: serial('id').primaryKey(),
+  name: varchar('name').notNull().unique(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
 
 export const product = pgTable('product', {
   id: serial('id').primaryKey(),
-  typeProductId: integer('type_product_id').references(() => productType.id),
+  categoryId: integer('category_id').references(() => category.id),
   name: varchar('name').notNull(),
   price: numeric('price', { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const productType = pgTable('product_type', {
-  id: serial('id').primaryKey(),
-  name: varchar('name').notNull().unique(),
-});
-
-export const productItem = pgTable('product_item', {
+export const ingredient = pgTable('ingredient', {
   id: serial('id').primaryKey(),
   SKU: varchar('SKU').notNull().unique(),
   name: varchar('name').notNull(),
   costUnit: numeric('cost_per_unit', { precision: 10, scale: 2 }),
-  costPound: numeric('cost_peer_pound', { precision: 10, scale: 2 }),
-  qtyUnit: integer('qty_unit'),
-  qtyPound: numeric('qty_pound', { precision: 10, scale: 2 }),
+  costPound: numeric('cost_per_pound', { precision: 10, scale: 2 }),
+  qtyUnit: integer('qty_unit').default(0),
+  qtyPound: numeric('qty_pound', { precision: 10, scale: 3 }).default('0'),
   outDate: timestamp('out_date'),
-  createdAt: timestamp('created_at').defaultNow(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const productTypeItem = pgTable('product_type_item', {
+export const recipeItem = pgTable('recipe_item', {
   id: serial('id').primaryKey(),
-  productTypeId: integer('product_type_id')
+  productId: integer('product_id')
     .notNull()
-    .references(() => productType.id),
-  productItemId: integer('product_item_id')
+    .references(() => product.id, { onDelete: 'cascade' }),
+  ingredientId: integer('ingredient_id')
     .notNull()
-    .references(() => productItem.id),
+    .references(() => ingredient.id),
+  qty: numeric('qty', { precision: 10, scale: 3 }).notNull(),
+  unit: unitType('unit').notNull(),
 });
 
 export const saleType = pgTable('sale_type', {
@@ -51,45 +67,48 @@ export const sales = pgTable('sales', {
   paymentMethodId: integer('payment_method_id').references(() => paymentMethod.id),
   subTotal: numeric('sub_total', { precision: 10, scale: 2 }).notNull(),
   total: numeric('total', { precision: 10, scale: 2 }).notNull(),
-  createdAt: timestamp('created_at').defaultNow(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-export const saleProduct = pgTable('sale_product', {
+export const saleItem = pgTable('sale_item', {
   id: serial('id').primaryKey(),
   saleId: integer('sale_id')
     .notNull()
-    .references(() => sales.id),
+    .references(() => sales.id, { onDelete: 'cascade' }),
   productId: integer('product_id')
     .notNull()
     .references(() => product.id),
   qty: integer('qty').notNull(),
+  unitPrice: numeric('unit_price', { precision: 10, scale: 2 }).notNull(),
 });
 
 // -- RELATIONS
-export const productRelations = relations(product, ({ one }) => ({
-  productType: one(productType, {
-    fields: [product.typeProductId],
-    references: [productType.id],
-  }),
-}));
 
-export const productTypeRelations = relations(productType, ({ many }) => ({
+export const categoryRelations = relations(category, ({ many }) => ({
   products: many(product),
-  productTypeItem: many(productTypeItem),
 }));
 
-export const productItemRelations = relations(productItem, ({ many }) => ({
-  productTypeItems: many(productTypeItem),
-}));
-
-export const productTypeItemRelations = relations(productTypeItem, ({ one }) => ({
-  productType: one(productType, {
-    fields: [productTypeItem.productTypeId],
-    references: [productType.id],
+export const productRelations = relations(product, ({ one, many }) => ({
+  category: one(category, {
+    fields: [product.categoryId],
+    references: [category.id],
   }),
-  productItem: one(productItem, {
-    fields: [productTypeItem.productItemId],
-    references: [productItem.id],
+  recipeItems: many(recipeItem),
+  saleItems: many(saleItem),
+}));
+
+export const ingredientRelations = relations(ingredient, ({ many }) => ({
+  recipeItems: many(recipeItem),
+}));
+
+export const recipeItemRelations = relations(recipeItem, ({ one }) => ({
+  product: one(product, {
+    fields: [recipeItem.productId],
+    references: [product.id],
+  }),
+  ingredient: one(ingredient, {
+    fields: [recipeItem.ingredientId],
+    references: [ingredient.id],
   }),
 }));
 
@@ -102,16 +121,16 @@ export const salesRelations = relations(sales, ({ one, many }) => ({
     fields: [sales.paymentMethodId],
     references: [paymentMethod.id],
   }),
-  saleProducts: many(saleProduct),
+  saleItems: many(saleItem),
 }));
 
-export const saleProductRelations = relations(saleProduct, ({ one }) => ({
+export const saleItemRelations = relations(saleItem, ({ one }) => ({
   sale: one(sales, {
-    fields: [saleProduct.saleId],
+    fields: [saleItem.saleId],
     references: [sales.id],
   }),
   product: one(product, {
-    fields: [saleProduct.productId],
+    fields: [saleItem.productId],
     references: [product.id],
   }),
 }));
