@@ -2,18 +2,19 @@
 
 import { useState, useTransition } from 'react';
 import { createProductAction } from '@/actions/product';
-import { ProductType, ProductWithType } from '@/models/product.model';
+import { Category } from '@/models/category.model';
+import { ProductWithCategory } from '@/models/product.model';
 
-type ProductFormProps = {
-  productTypes: ProductType[];
-  onCreate: (newProduct: ProductWithType) => void;
+type Props = {
+  categories: Category[];
+  onCreate: (product: ProductWithCategory) => void;
 };
 
-export function ProductForm({ productTypes, onCreate }: ProductFormProps) {
+export function ProductForm({ categories, onCreate }: Props) {
   const [pending, startTransition] = useTransition();
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
-  const [typeProductId, setTypeProductId] = useState('');
+  const [categoryId, setCategoryId] = useState('');
 
   const handleSubmit = (formData: FormData) => {
     startTransition(async () => {
@@ -21,9 +22,11 @@ export function ProductForm({ productTypes, onCreate }: ProductFormProps) {
       if (newProduct) {
         onCreate(newProduct);
         setName('');
+        setPrice('');
       }
     });
   };
+
   return (
     <form action={handleSubmit} className="space-y-4">
       <input
@@ -46,20 +49,21 @@ export function ProductForm({ productTypes, onCreate }: ProductFormProps) {
         disabled={pending}
       />
       <select
-        name="typeProductId"
+        name="categoryId"
         className="border p-2 w-full"
-        value={typeProductId}
-        onChange={(e) => setTypeProductId(e.target.value)}
+        value={categoryId}
+        onChange={(e) => setCategoryId(e.target.value)}
         required
         disabled={pending}
       >
-        {productTypes.map((type) => (
-          <option key={type.id} value={type.id}>
-            {type.name}
+        <option value="">Seleccionar categoría</option>
+        {categories.map((cat) => (
+          <option key={cat.id} value={cat.id}>
+            {cat.name}
           </option>
         ))}
       </select>
-      <button type="submit" className="bg-blue-600 text-white p-2 rounded">
+      <button type="submit" className="bg-blue-600 text-white p-2 rounded" disabled={pending}>
         {pending ? 'Creando...' : 'Crear producto'}
       </button>
     </form>
