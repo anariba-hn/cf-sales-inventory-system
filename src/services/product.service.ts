@@ -1,98 +1,63 @@
 import { db } from '@/db';
-import { product, productType } from '@/db/schema';
+import { product, category } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-
-import { CreateProductDto, UpdateProductDto, CreateProductTypeDto } from '@/dtos/product.dto';
-import { ProductWithType, Product, ProductType } from '@/models/product.model';
+import { CreateProductDto, UpdateProductDto } from '@/dtos/product.dto';
+import { ProductWithCategory, Product } from '@/models/product.model';
 
 export class ProductService {
-  static async getAll(): Promise<ProductWithType[]> {
+  static async getAll(): Promise<ProductWithCategory[]> {
     const data = await db
       .select({
         id: product.id,
         name: product.name,
         price: product.price,
-        typeProductId: product.typeProductId,
-        type: productType.name,
+        categoryId: product.categoryId,
+        category: category.name,
       })
       .from(product)
-      .leftJoin(productType, eq(product.typeProductId, productType.id));
+      .leftJoin(category, eq(product.categoryId, category.id));
 
-    return data.map((r) => ({
-      ...r,
-      price: Number(r.price),
-    }));
+    return data.map((r) => ({ ...r, price: Number(r.price) }));
   }
 
-  static async getTypeAll(): Promise<ProductType[]> {
-    const data = await db
-      .select({
-        id: productType.id,
-        name: productType.name,
-      })
-      .from(productType);
-
-    return data;
-  }
-
-  static async getById(id: number) {
+  static async getById(id: number): Promise<Product | null> {
     const [result] = await db.select().from(product).where(eq(product.id, id));
-
-    return result ?? null;
+    if (!result) return null;
+    return { ...result, price: Number(result.price) };
   }
 
-  static async create(data: CreateProductDto): Promise<ProductWithType> {
-    const { name, price, typeProductId } = data;
+  static async create(data: CreateProductDto): Promise<ProductWithCategory> {
+    const categoryExists = await db
+      .select()
+      .from(category)
+      .where(eq(category.id, data.categoryId));
+    if (!categoryExists.length) throw new Error(`Category ID ${data.categoryId} does not exist`);
 
-    const typeExists = await db.select().from(productType).where(eq(productType.id, typeProductId));
+    const [newProduct] = await db
+      .insert(product)
+      .values({ name: data.name, price: data.price, categoryId: data.categoryId })
+      .returning();
 
-    if (typeExists.length === 0) {
-      throw new Error(`Product type ID ${typeProductId} does not exist`);
-    }
-
-    const newProduct = await db.insert(product).values({ name, price, typeProductId }).returning();
-
-    const result = newProduct[0];
-    return {
-      ...result,
-      price: Number(result.price),
-      type: null,
-    };
-  }
-
-  static async createType(data: CreateProductTypeDto): Promise<ProductType> {
-    const { name } = data;
-
-    const typeExists = await db.select().from(productType).where(eq(productType.name, name));
-
-    if (typeExists.length !== 0) {
-      throw new Error(`Product type ${typeExists} does already exist`);
-    }
-
-    const [newProductType] = await db.insert(productType).values({ name }).returning();
-
-    return newProductType;
+    return { ...newProduct, price: Number(newProduct.price), category: null };
   }
 
   static async update(id: number, data: UpdateProductDto): Promise<Product | null> {
-    const updated = await db.update(product).set(data).where(eq(product.id, id)).returning({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      typeProductId: product.typeProductId,
-    });
-
-    if (!updated.length) return null;
-
-    const [result] = updated;
-    return {
-      ...result,
-      price: Number(result.price),
-    };
+    const [result] = await db
+      .update(product)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(product.id, id))
+      .returning({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        categoryId: product.categoryId,
+      });
+    if (!result) return null;
+    return { ...result, price: Number(result.price) };
   }
 
   static async delete(id: number): Promise<boolean> {
-    const deleted = await db.delete(product).where(eq(product.id, id));
-    return deleted.rowCount > 0;
+    const result = await db.delete(product).where(eq(product.id, id));
+    return (result.rowCount ?? 0) > 0;
   }
 }
