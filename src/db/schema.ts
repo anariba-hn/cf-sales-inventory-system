@@ -10,6 +10,15 @@ import {
 import { relations } from 'drizzle-orm';
 
 export const unitType = pgEnum('unit_type', ['unit', 'pound']);
+export const roleType = pgEnum('role_type', ['admin', 'inventory_manager', 'cashier']);
+
+export const user = pgTable('user', {
+  id: serial('id').primaryKey(),
+  username: varchar('username', { length: 50 }).notNull().unique(),
+  password: varchar('password', { length: 255 }).notNull(),
+  role: roleType('role').notNull().default('cashier'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
 
 export const category = pgTable('category', {
   id: serial('id').primaryKey(),

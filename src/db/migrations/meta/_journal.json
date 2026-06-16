@@ -8,6 +8,13 @@
       "when": 1781501669894,
       "tag": "0000_chilly_sersi",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1781504350403,
+      "tag": "0001_stale_human_robot",
+      "breakpoints": true
     }
   ]
 }

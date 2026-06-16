@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import { db } from '@/db/index';
 import {
   category,
@@ -8,6 +9,7 @@ import {
   paymentMethod,
   sales,
   saleItem,
+  user,
 } from '@/db/schema';
 
 async function seed() {
@@ -20,10 +22,11 @@ async function seed() {
       { name: 'Bebidas' },
       { name: 'Misceláneos' },
     ])
+    .onConflictDoNothing()
     .returning();
 
-  const desayunos = categories.find((c) => c.name === 'Desayunos')!;
-  const almuerzos = categories.find((c) => c.name === 'Almuerzos')!;
+  const desayunos = categories.find((c) => c.name === 'Desayunos');
+  const almuerzos = categories.find((c) => c.name === 'Almuerzos');
 
   // Ingredients
   const ingredients = await db
@@ -36,68 +39,94 @@ async function seed() {
       { SKU: 'TOR001', name: 'Tortilla', costUnit: '0.50', qtyUnit: 50 },
       { SKU: 'CRM001', name: 'Crema', costPound: '4.00', qtyPound: '3.000' },
     ])
+    .onConflictDoNothing()
     .returning();
 
-  const find = (sku: string) => ingredients.find((i) => i.SKU === sku)!;
+  // Products (only if categories were freshly inserted)
+  if (desayunos && almuerzos) {
+    const find = (sku: string) => ingredients.find((i) => i.SKU === sku)!;
 
-  // Products
-  const products = await db
-    .insert(product)
+    const products = await db
+      .insert(product)
+      .values([
+        { name: 'Baleada con Todo', price: '25.00', categoryId: desayunos.id },
+        { name: 'Almuerzo Típico', price: '75.00', categoryId: almuerzos.id },
+      ])
+      .onConflictDoNothing()
+      .returning();
+
+    const baleada = products.find((p) => p.name === 'Baleada con Todo');
+    const almuerzo = products.find((p) => p.name === 'Almuerzo Típico');
+
+    if (baleada && almuerzo && ingredients.length > 0) {
+      await db
+        .insert(recipeItem)
+        .values([
+          { productId: baleada.id, ingredientId: find('FRJ001').id, qty: '0.100', unit: 'pound' },
+          { productId: baleada.id, ingredientId: find('HUE001').id, qty: '2', unit: 'unit' },
+          { productId: baleada.id, ingredientId: find('AGU001').id, qty: '0.050', unit: 'pound' },
+          { productId: baleada.id, ingredientId: find('TOR001').id, qty: '1', unit: 'unit' },
+          { productId: baleada.id, ingredientId: find('CRM001').id, qty: '0.050', unit: 'pound' },
+          { productId: almuerzo.id, ingredientId: find('FRJ001').id, qty: '0.150', unit: 'pound' },
+          { productId: almuerzo.id, ingredientId: find('HUE001').id, qty: '1', unit: 'unit' },
+          { productId: almuerzo.id, ingredientId: find('PLL001').id, qty: '0.300', unit: 'pound' },
+          { productId: almuerzo.id, ingredientId: find('TOR001').id, qty: '2', unit: 'unit' },
+          { productId: almuerzo.id, ingredientId: find('CRM001').id, qty: '0.050', unit: 'pound' },
+        ])
+        .onConflictDoNothing();
+    }
+
+    // Sale types + payment methods + sample sale
+    const [contado] = await db
+      .insert(saleType)
+      .values([{ name: 'Contado' }, { name: 'Crédito' }])
+      .onConflictDoNothing()
+      .returning();
+
+    const [efectivo] = await db
+      .insert(paymentMethod)
+      .values([{ name: 'Efectivo' }, { name: 'Tarjeta' }, { name: 'Transferencia' }])
+      .onConflictDoNothing()
+      .returning();
+
+    if (contado && efectivo) {
+      const [venta1] = await db
+        .insert(sales)
+        .values([
+          {
+            saleTypeId: contado.id,
+            paymentMethodId: efectivo.id,
+            subTotal: '125.00',
+            total: '125.00',
+          },
+        ])
+        .returning();
+
+      await db.insert(saleItem).values([
+        { saleId: venta1.id, productId: baleada.id, qty: 2, unitPrice: '25.00' },
+        { saleId: venta1.id, productId: almuerzo.id, qty: 1, unitPrice: '75.00' },
+      ]);
+    }
+  }
+
+  // Users — one per role for testing
+  const hashedAdmin = await bcrypt.hash('admin123', 10);
+  const hashedManager = await bcrypt.hash('manager123', 10);
+  const hashedCashier = await bcrypt.hash('cashier123', 10);
+
+  await db
+    .insert(user)
     .values([
-      { name: 'Baleada con Todo', price: '25.00', categoryId: desayunos.id },
-      { name: 'Almuerzo Típico', price: '75.00', categoryId: almuerzos.id },
+      { username: 'admin', password: hashedAdmin, role: 'admin' },
+      { username: 'manager', password: hashedManager, role: 'inventory_manager' },
+      { username: 'cashier', password: hashedCashier, role: 'cashier' },
     ])
-    .returning();
-
-  const baleada = products.find((p) => p.name === 'Baleada con Todo')!;
-  const almuerzo = products.find((p) => p.name === 'Almuerzo Típico')!;
-
-  // Recipes
-  await db.insert(recipeItem).values([
-    { productId: baleada.id, ingredientId: find('FRJ001').id, qty: '0.100', unit: 'pound' },
-    { productId: baleada.id, ingredientId: find('HUE001').id, qty: '2', unit: 'unit' },
-    { productId: baleada.id, ingredientId: find('AGU001').id, qty: '0.050', unit: 'pound' },
-    { productId: baleada.id, ingredientId: find('TOR001').id, qty: '1', unit: 'unit' },
-    { productId: baleada.id, ingredientId: find('CRM001').id, qty: '0.050', unit: 'pound' },
-
-    { productId: almuerzo.id, ingredientId: find('FRJ001').id, qty: '0.150', unit: 'pound' },
-    { productId: almuerzo.id, ingredientId: find('HUE001').id, qty: '1', unit: 'unit' },
-    { productId: almuerzo.id, ingredientId: find('PLL001').id, qty: '0.300', unit: 'pound' },
-    { productId: almuerzo.id, ingredientId: find('TOR001').id, qty: '2', unit: 'unit' },
-    { productId: almuerzo.id, ingredientId: find('CRM001').id, qty: '0.050', unit: 'pound' },
-  ]);
-
-  // Sale types
-  const [contado] = await db
-    .insert(saleType)
-    .values([{ name: 'Contado' }, { name: 'Crédito' }])
-    .returning();
-
-  // Payment methods
-  const [efectivo] = await db
-    .insert(paymentMethod)
-    .values([{ name: 'Efectivo' }, { name: 'Tarjeta' }, { name: 'Transferencia' }])
-    .returning();
-
-  // Sample sale
-  const [venta1] = await db
-    .insert(sales)
-    .values([
-      {
-        saleTypeId: contado.id,
-        paymentMethodId: efectivo.id,
-        subTotal: '125.00',
-        total: '125.00',
-      },
-    ])
-    .returning();
-
-  await db.insert(saleItem).values([
-    { saleId: venta1.id, productId: baleada.id, qty: 2, unitPrice: '25.00' },
-    { saleId: venta1.id, productId: almuerzo.id, qty: 1, unitPrice: '75.00' },
-  ]);
+    .onConflictDoNothing();
 
   console.log('✅ Seed executed successfully.');
+  console.log('   admin / admin123');
+  console.log('   manager / manager123');
+  console.log('   cashier / cashier123');
 }
 
 seed().catch((err) => {
