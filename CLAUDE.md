@@ -133,10 +133,14 @@ saleProduct         — line items: which products sold in a sale, with qty
 | Product CRUD (type + product) | Done |
 | Responsive sidebar/header layout | Done |
 | Auth guard on `(protected)` routes | Done |
-| Inventory module (productItem CRUD) | Pending |
+| Inventory module (ingredient CRUD) | Done |
+| Sales module (POS flow + cart + cashback) | Done |
+| Sales history (period filter, pagination, KPIs) | Done |
+| Users module (admin-only, list/create/delete) | Done |
+| Unit tests — services + session (90%+ coverage) | Done |
 | ProductTypeItem linking UI | Pending |
-| Sales module (POS flow) | Pending |
 | Dashboard with real metrics | Pending |
+| ISV tax 15% (schema + sales flow) | Pending |
 
 ---
 
