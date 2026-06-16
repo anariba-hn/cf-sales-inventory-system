@@ -3,12 +3,13 @@
 import { UserService } from '@/services/user.service';
 import { revalidatePath } from 'next/cache';
 import type { Role } from '@/lib/session';
+import type { User } from '@/models/user.model';
 
 export async function getUsersAction() {
   return UserService.getAll();
 }
 
-export async function createUserAction(formData: FormData): Promise<{ error: string } | void> {
+export async function createUserAction(formData: FormData): Promise<{ error: string } | User> {
   const username = (formData.get('username') as string)?.trim();
   const password = formData.get('password') as string;
   const role = formData.get('role') as Role;
@@ -19,7 +20,7 @@ export async function createUserAction(formData: FormData): Promise<{ error: str
   try {
     const result = await UserService.create({ username, password, role });
     revalidatePath('/users');
-    return result as unknown as void;
+    return result;
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Error al crear usuario' };
   }

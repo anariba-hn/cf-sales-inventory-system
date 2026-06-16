@@ -103,8 +103,8 @@ async function seed() {
         .returning();
 
       await db.insert(saleItem).values([
-        { saleId: venta1.id, productId: baleada.id, qty: 2, unitPrice: '25.00' },
-        { saleId: venta1.id, productId: almuerzo.id, qty: 1, unitPrice: '75.00' },
+        { saleId: venta1.id, productId: baleada!.id, qty: 2, unitPrice: '25.00' },
+        { saleId: venta1.id, productId: almuerzo!.id, qty: 1, unitPrice: '75.00' },
       ]);
     }
   }

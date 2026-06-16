@@ -22,10 +22,10 @@ export function UserForm({ onCreate }: Props) {
     setError('');
     startTransition(async () => {
       const result = await createUserAction(formData);
-      if (result && 'error' in result) {
+      if ('error' in result) {
         setError(result.error);
-      } else if (result) {
-        onCreate(result as unknown as User);
+      } else {
+        onCreate(result);
       }
     });
   };
