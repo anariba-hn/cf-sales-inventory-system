@@ -8,11 +8,15 @@ export async function getCategoriesAction() {
 }
 
 export async function createCategoryAction(formData: FormData) {
-  const name = formData.get('name') as string;
-  if (!name) throw new Error('Invalid form data');
-  const result = await CategoryService.create({ name });
-  revalidatePath('/products');
-  return result;
+  const name = (formData.get('name') as string)?.trim();
+  if (!name) return { error: 'El nombre de categoría es requerido' };
+  try {
+    const result = await CategoryService.create({ name });
+    revalidatePath('/products');
+    return result;
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Error al crear categoría' };
+  }
 }
 
 export async function updateCategoryAction(id: number, data: { name?: string }) {

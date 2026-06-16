@@ -16,12 +16,21 @@ export function LoginForm() {
   };
 
   return (
-    <form action={handleSubmit} className="bg-white p-8 rounded-lg shadow-md space-y-5">
+    <form action={handleSubmit} className="bg-white dark:bg-zinc-900 p-8 rounded-xl shadow-md border border-zinc-200 dark:border-zinc-700 space-y-5">
       <div>
-        <label className="text-sm font-medium text-gray-700 block mb-1">Usuario</label>
+        <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 block mb-1">
+          Usuario
+        </label>
         <input
           name="username"
-          className="border rounded p-2.5 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          aria-invalid={!!error}
+          className="w-full rounded-lg border border-zinc-300 dark:border-zinc-600
+                     bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50
+                     placeholder:text-zinc-400 dark:placeholder:text-zinc-500
+                     px-3 py-2.5 text-sm
+                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+                     disabled:cursor-not-allowed disabled:opacity-50
+                     aria-[invalid=true]:border-red-500"
           placeholder="admin"
           required
           disabled={pending}
@@ -30,11 +39,20 @@ export function LoginForm() {
         />
       </div>
       <div>
-        <label className="text-sm font-medium text-gray-700 block mb-1">Contraseña</label>
+        <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300 block mb-1">
+          Contraseña
+        </label>
         <input
           name="password"
           type="password"
-          className="border rounded p-2.5 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          aria-invalid={!!error}
+          className="w-full rounded-lg border border-zinc-300 dark:border-zinc-600
+                     bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50
+                     placeholder:text-zinc-400 dark:placeholder:text-zinc-500
+                     px-3 py-2.5 text-sm
+                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+                     disabled:cursor-not-allowed disabled:opacity-50
+                     aria-[invalid=true]:border-red-500"
           placeholder="••••••••"
           required
           disabled={pending}
@@ -42,14 +60,16 @@ export function LoginForm() {
         />
       </div>
       {error && (
-        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
           {error}
         </p>
       )}
       <button
         type="submit"
         disabled={pending}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded transition-colors disabled:opacity-50"
+        className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600
+                   text-white font-medium py-2.5 rounded-lg transition-colors
+                   disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
       >
         {pending ? 'Ingresando...' : 'Ingresar'}
       </button>

@@ -8,8 +8,8 @@ export async function getIngredientsAction() {
 }
 
 export async function createIngredientAction(formData: FormData) {
-  const SKU = formData.get('SKU') as string;
-  const name = formData.get('name') as string;
+  const SKU = (formData.get('SKU') as string)?.trim();
+  const name = (formData.get('name') as string)?.trim();
   const costUnit = (formData.get('costUnit') as string) || undefined;
   const costPound = (formData.get('costPound') as string) || undefined;
   const qtyUnitRaw = formData.get('qtyUnit') as string;
@@ -18,11 +18,15 @@ export async function createIngredientAction(formData: FormData) {
   const outDateRaw = formData.get('outDate') as string;
   const outDate = outDateRaw ? new Date(outDateRaw) : undefined;
 
-  if (!SKU || !name) throw new Error('SKU and name are required');
+  if (!SKU || !name) return { error: 'SKU y nombre son requeridos' };
 
-  const result = await IngredientService.create({ SKU, name, costUnit, costPound, qtyUnit, qtyPound, outDate });
-  revalidatePath('/inventory');
-  return result;
+  try {
+    const result = await IngredientService.create({ SKU, name, costUnit, costPound, qtyUnit, qtyPound, outDate });
+    revalidatePath('/inventory');
+    return result;
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Error al crear ingrediente' };
+  }
 }
 
 export async function updateIngredientAction(id: number, data: {

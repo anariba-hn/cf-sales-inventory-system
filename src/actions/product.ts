@@ -8,15 +8,19 @@ export async function getProductsAction() {
 }
 
 export async function createProductAction(formData: FormData) {
-  const name = formData.get('name') as string;
+  const name = (formData.get('name') as string)?.trim();
   const price = formData.get('price') as string;
   const categoryId = parseInt(formData.get('categoryId') as string, 10);
 
-  if (!name || !price || isNaN(categoryId)) throw new Error('Invalid form data');
+  if (!name || !price || isNaN(categoryId)) return { error: 'Todos los campos son requeridos' };
 
-  const result = await ProductService.create({ name, price, categoryId });
-  revalidatePath('/products');
-  return result;
+  try {
+    const result = await ProductService.create({ name, price, categoryId });
+    revalidatePath('/products');
+    return result;
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Error al crear producto' };
+  }
 }
 
 export async function updateProductAction(

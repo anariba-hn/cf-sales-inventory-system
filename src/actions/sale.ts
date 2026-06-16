@@ -13,12 +13,16 @@ export async function getPaymentMethodsAction() {
 }
 
 export async function createSaleAction(data: CreateSaleDto) {
-  if (!data.items.length) throw new Error('La venta debe tener al menos un producto');
-  const result = await SaleService.create(data);
-  revalidatePath('/sales');
-  revalidatePath('/sales/history');
-  revalidatePath('/inventory');
-  return result;
+  if (!data.items.length) return { error: 'La venta debe tener al menos un producto' };
+  try {
+    const result = await SaleService.create(data);
+    revalidatePath('/sales');
+    revalidatePath('/sales/history');
+    revalidatePath('/inventory');
+    return result;
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Error al procesar la venta' };
+  }
 }
 
 export async function getSaleHistoryAction(dto: GetSaleHistoryDto) {
