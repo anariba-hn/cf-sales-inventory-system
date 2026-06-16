@@ -15,6 +15,7 @@ export default defineConfig({
       exclude: [
         'src/db/**',
         'src/app/**',
+        'src/actions/**',
         'src/test/**',
         '**/*.dto.ts',
         '**/*.model.ts',
