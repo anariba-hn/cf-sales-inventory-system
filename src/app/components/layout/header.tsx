@@ -1,5 +1,6 @@
 import { logoutAction } from '@/actions/auth';
 import { LogOut } from 'lucide-react';
+import { ThemeToggle } from '@/app/components/ui/theme-toggle';
 
 type Props = { username: string };
 
@@ -9,7 +10,8 @@ export function Header({ username }: Props) {
       <h1 className="text-base font-semibold text-zinc-700 dark:text-zinc-300 hidden md:block">
         CF Inventory Sale System
       </h1>
-      <div className="flex items-center gap-4 ml-auto">
+      <div className="flex items-center gap-2 ml-auto">
+        <ThemeToggle />
         <span className="text-sm text-zinc-500 dark:text-zinc-400">
           Hola, <strong className="text-zinc-700 dark:text-zinc-200">{username}</strong>
         </span>
