@@ -1,0 +1,20 @@
+changelog:
+  categories:
+    - title: 🚀 Features
+      labels: ['*']
+      exclude:
+        labels: ['*']
+      types: ['feat']
+    - title: 🐛 Bug Fixes
+      types: ['fix']
+    - title: ♻️ Refactors
+      types: ['refactor']
+    - title: 🧪 Tests
+      types: ['test']
+    - title: 🏗️ Chores
+      types: ['chore', 'build', 'ci', 'docs', 'style']
+
+  # Group commits by conventional type prefix (feat:, fix:, etc.)
+  exclude:
+    labels:
+      - 'skip-changelog'
