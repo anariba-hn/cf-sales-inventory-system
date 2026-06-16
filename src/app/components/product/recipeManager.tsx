@@ -47,6 +47,8 @@ export function RecipeManager({ productId, productName }: Props) {
     setIngredients(ingredientData);
   };
 
+  // refresh is stable (defined outside the effect) — intentionally omitted from deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { refresh(); }, [productId]);
 
   const handleAdd = () => {

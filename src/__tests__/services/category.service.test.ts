@@ -39,7 +39,7 @@ const {
   mockWhere, mockFrom,
   mockReturning, mockInsert,
   mockUpdateReturning,
-  mockDeleteWhere, mockDelete,
+  mockDeleteWhere,
 } = mocks;
 
 describe('CategoryService', () => {
