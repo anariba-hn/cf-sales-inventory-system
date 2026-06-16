@@ -35,13 +35,17 @@ export default function Products() {
         <div className="flex gap-2">
           <button
             onClick={() => setShowCategoryModal(true)}
-            className="border px-3 py-1.5 rounded text-sm hover:bg-gray-50"
+            className="border border-zinc-300 dark:border-zinc-600 px-3 py-1.5 rounded-lg text-sm
+                       text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors
+                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             + Categoría
           </button>
           <button
             onClick={() => setShowProductModal(true)}
-            className="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700"
+            className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600
+                       text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
+                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             + Nuevo producto
           </button>
@@ -51,7 +55,7 @@ export default function Products() {
       {categories.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
-            <span key={cat.id} className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
+            <span key={cat.id} className="bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 text-xs px-3 py-1 rounded-full">
               {cat.name}
             </span>
           ))}

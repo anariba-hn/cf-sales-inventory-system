@@ -139,7 +139,7 @@ saleProduct         — line items: which products sold in a sale, with qty
 | Users module (admin-only, list/create/delete) | Done |
 | Unit tests — services + session (90%+ coverage) | Done |
 | Health check endpoint (`GET /api/health`) | Done |
-| ProductTypeItem linking UI | Pending |
+| Recipe manager — ingredient ↔ product linking UI | Done |
 | Dashboard with real metrics | Pending |
 | ISV tax 15% (schema + sales flow) | Pending |
 | Vercel UAT deployment | Pending |
