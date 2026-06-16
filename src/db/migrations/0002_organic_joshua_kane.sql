@@ -1,0 +1,1 @@
+ALTER TABLE "sales" ADD COLUMN "cash_received" numeric(10, 2);

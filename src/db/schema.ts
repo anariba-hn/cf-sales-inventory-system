@@ -76,6 +76,8 @@ export const sales = pgTable('sales', {
   paymentMethodId: integer('payment_method_id').references(() => paymentMethod.id),
   subTotal: numeric('sub_total', { precision: 10, scale: 2 }).notNull(),
   total: numeric('total', { precision: 10, scale: 2 }).notNull(),
+  // Only populated when paymentMethod is Efectivo
+  cashReceived: numeric('cash_received', { precision: 10, scale: 2 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 

@@ -18,6 +18,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/inventory', label: 'Inventario', roles: ['admin', 'inventory_manager'] },
   { href: '/products', label: 'Productos', roles: ['admin', 'inventory_manager', 'cashier'] },
   { href: '/sales', label: 'Ventas', roles: ['admin', 'cashier'] },
+  { href: '/sales/history', label: 'Historial', roles: ['admin', 'cashier'] },
   { href: '/users', label: 'Usuarios', roles: ['admin'] },
 ];
 
