@@ -56,10 +56,16 @@ schema.ts (DB table + relations)
 ### Scripts
 
 ```bash
-npm run db:generate   # generate migration from schema changes
-npm run db:migrate    # run pending migrations
-npm run db:seed       # seed with sample data (idempotency not guaranteed — use once)
+npm run db:generate      # generate migration from schema changes
+npm run db:migrate       # run pending migrations (idempotent once tracking table is seeded)
+npm run db:fix-tracking  # one-time fix: stamps drizzle.__drizzle_migrations when schema was
+                         # applied outside of db:migrate (e.g. fresh Neon branch, db:push).
+                         # Run this before the first db:migrate on any new database target.
+npm run db:seed          # seed with sample data (idempotency not guaranteed — use once)
 ```
+
+> **When switching to a new database (Neon branch, fresh env):** run `db:fix-tracking` first,
+> then `db:migrate`. Skipping this causes "type already exists" failures on deploy.
 
 ### Environment
 

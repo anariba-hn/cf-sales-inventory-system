@@ -15,6 +15,7 @@
     "test:coverage": "vitest run --coverage",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx ./src/db/migrate.ts",
+    "db:fix-tracking": "tsx ./src/db/fix-migrations.ts",
     "db:seed": "tsx ./src/db/seed.ts",
     "db:reset": "tsx ./src/db/reset.ts"
   },
