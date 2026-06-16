@@ -67,6 +67,7 @@ Requires `.env.local` at project root:
 
 ```env
 DATABASE_URL=postgres://...  # Neon connection string
+JWT_SECRET=...               # ≥32 char random string for session signing
 ```
 
 ---
@@ -131,7 +132,7 @@ saleProduct         — line items: which products sold in a sale, with qty
 |---|---|
 | Product CRUD (type + product) | Done |
 | Responsive sidebar/header layout | Done |
-| Auth guard on `(protected)` routes | Pending |
+| Auth guard on `(protected)` routes | Done |
 | Inventory module (productItem CRUD) | Pending |
 | ProductTypeItem linking UI | Pending |
 | Sales module (POS flow) | Pending |
