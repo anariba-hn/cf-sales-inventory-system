@@ -28,6 +28,13 @@ export interface SaleModel {
   items: SaleItemModel[];
 }
 
+export interface SaleHistoryItem {
+  productId: number;
+  productName: string;
+  qty: number;
+  unitPrice: number;
+}
+
 export interface SaleHistory {
   id: number;
   saleType: string | null;
@@ -35,6 +42,15 @@ export interface SaleHistory {
   subTotal: number;
   total: number;
   cashReceived: number | null;
-  itemCount: number;
+  items: SaleHistoryItem[];
   createdAt: Date;
+}
+
+export interface SaleHistoryPage {
+  data: SaleHistory[];
+  total: number;
+  periodRevenue: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }

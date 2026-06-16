@@ -1,7 +1,7 @@
 'use server';
 
 import { SaleService } from '@/services/sale.service';
-import { CreateSaleDto } from '@/dtos/sale.dto';
+import { CreateSaleDto, GetSaleHistoryDto } from '@/dtos/sale.dto';
 import { revalidatePath } from 'next/cache';
 
 export async function getSaleTypesAction() {
@@ -21,6 +21,6 @@ export async function createSaleAction(data: CreateSaleDto) {
   return result;
 }
 
-export async function getSaleHistoryAction() {
-  return SaleService.getHistory();
+export async function getSaleHistoryAction(dto: GetSaleHistoryDto) {
+  return SaleService.getHistory(dto);
 }

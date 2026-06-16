@@ -12,3 +12,11 @@ export interface CreateSaleDto {
   cashReceived?: string;
   items: CreateSaleItemDto[];
 }
+
+export type HistoryPeriod = 'day' | 'week' | 'month' | 'all';
+
+export interface GetSaleHistoryDto {
+  period: HistoryPeriod;
+  page: number;
+  pageSize: number;
+}
